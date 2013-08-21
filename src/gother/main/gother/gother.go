@@ -4,52 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"gother/statusboard"
-	"log"
+	"gother/system"
 	"net/http"
-	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 )
-
-type MemInfo struct {
-	free     int
-	active   int
-	wired    int
-	inactive int
-}
-
-func vm_stat() *MemInfo {
-	m := new(MemInfo)
-	out, err := exec.Command("vm_stat").Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	lines := strings.Split(string(out), "\n")
-	lines = lines[1 : len(lines)-2] // exclude header/footer
-	for _, line := range lines {
-		rows := strings.Split(line, ":")
-		val := rows[1]
-		val = strings.TrimLeft(val, " ")
-		val = strings.TrimRight(val, ".")
-		int_val, _ := strconv.Atoi(val)
-		int_val = int_val * 4096        // page to Byte
-		int_val = int_val / 1024 / 1024 // to MByte
-		switch rows[0] {
-		case "Pages free":
-			m.free = int_val
-		case "Pages speculative":
-			m.free += int_val
-		case "Pages active":
-			m.active = int_val
-		case "Pages inactive":
-			m.inactive = int_val
-		case "Pages wired down":
-			m.wired = int_val
-		}
-	}
-	return m
-}
 
 func hello_handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello Go!")
@@ -58,7 +16,7 @@ func hello_handler(w http.ResponseWriter, r *http.Request) {
 func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 	type MemStat struct {
 		label   string
-		meminfo *MemInfo
+		meminfo *system.MemInfo
 	}
 	memstats := make([]MemStat, 0)
 
@@ -66,7 +24,7 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 
 		m := MemStat{
 			label:   time.Now().Format("15:04:05"),
-			meminfo: vm_stat(),
+			meminfo: system.GetMemInfo(),
 		}
 
 		memstats = append(memstats, m)
@@ -83,13 +41,13 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 				var val int
 				switch memtype {
 				case "MemWired":
-					val = memstat.meminfo.wired
+					val = memstat.meminfo.Wired
 				case "MemActive":
-					val = memstat.meminfo.active
+					val = memstat.meminfo.Active
 				case "MemInactive":
-					val = memstat.meminfo.inactive
+					val = memstat.meminfo.Inactive
 				case "MemFree":
-					val = memstat.meminfo.free
+					val = memstat.meminfo.Free
 				}
 				*datapoint = append(*datapoint,
 					statusboard.DataPoint{
