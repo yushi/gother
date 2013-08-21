@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gother/statusboard"
 	"log"
 	"net/http"
 	"os/exec"
@@ -32,9 +33,13 @@ func vm_stat() *MemInfo {
 		val = strings.TrimLeft(val, " ")
 		val = strings.TrimRight(val, ".")
 		int_val, _ := strconv.Atoi(val)
+		int_val = int_val * 4096        // page to Byte
+		int_val = int_val / 1024 / 1024 // to MByte
 		switch rows[0] {
 		case "Pages free":
 			m.free = int_val
+		case "Pages speculative":
+			m.free += int_val
 		case "Pages active":
 			m.active = int_val
 		case "Pages inactive":
@@ -50,83 +55,73 @@ func hello_handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello Go!")
 }
 
-type StatusBoardJSON struct {
-	Graph StatusBoardJSONGraph `json:"graph"`
-}
-
-type StatusBoardJSONGraph struct {
-	Title         string                      `json:"title"`
-	Datasequences []StatusBoardJSONGraphEntry `json:"datasequences"`
-}
-
-type StatusBoardJSONGraphEntry struct {
-	Title      string                     `json:"title"`
-	Datapoints []StatusBoardJSONDataPoint `json:"datapoints"`
-}
-
-type StatusBoardJSONDataPoint struct {
-	Title string `json:"title"`
-	Value int    `json:"value"`
-}
-
-func proc_handler(w http.ResponseWriter, r *http.Request) {
-	m := vm_stat()
-	memfree_datapoints := []StatusBoardJSONDataPoint{
-		StatusBoardJSONDataPoint{
-			Title: "20130820",
-			Value: m.free,
-		},
-		StatusBoardJSONDataPoint{
-			Title: "20130821",
-			Value: m.free,
-		},
-		StatusBoardJSONDataPoint{
-			Title: "20130822",
-			Value: m.free,
-		},
+func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
+	type MemStat struct {
+		label   string
+		meminfo *MemInfo
 	}
-	memactive_datapoints := []StatusBoardJSONDataPoint{
-		StatusBoardJSONDataPoint{
-			Title: "20130820",
-			Value: m.active,
-		},
-		StatusBoardJSONDataPoint{
-			Title: "20130821",
-			Value: m.active,
-		},
-		StatusBoardJSONDataPoint{
-			Title: "20130822",
-			Value: m.active,
-		},
-	}
+	memstats := make([]MemStat, 0)
 
-	graph_entries := []StatusBoardJSONGraphEntry{
-		StatusBoardJSONGraphEntry{
-			Title:      "MemFree",
-			Datapoints: memfree_datapoints,
-		},
-		StatusBoardJSONGraphEntry{
-			Title:      "MemActive",
-			Datapoints: memactive_datapoints,
-		},
-	}
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	jsonobj := StatusBoardJSON{
-		Graph: StatusBoardJSONGraph{
-			Title:         "SystemInfo",
-			Datasequences: graph_entries,
-		},
-	}
+		m := MemStat{
+			label:   time.Now().Format("15:04:05"),
+			meminfo: vm_stat(),
+		}
 
-	fmt.Println(jsonobj)
-	b, err := json.Marshal(jsonobj)
-	fmt.Println(err)
-	fmt.Println(time.Now())
-	fmt.Fprintf(w, "%s", b)
+		memstats = append(memstats, m)
+
+		datapoints := map[string]*[]statusboard.DataPoint{
+			"MemWired":    new([]statusboard.DataPoint),
+			"MemActive":   new([]statusboard.DataPoint),
+			"MemInactive": new([]statusboard.DataPoint),
+			"MemFree":     new([]statusboard.DataPoint),
+		}
+
+		for _, memstat := range memstats {
+			for memtype, datapoint := range datapoints {
+				var val int
+				switch memtype {
+				case "MemWired":
+					val = memstat.meminfo.wired
+				case "MemActive":
+					val = memstat.meminfo.active
+				case "MemInactive":
+					val = memstat.meminfo.inactive
+				case "MemFree":
+					val = memstat.meminfo.free
+				}
+				*datapoint = append(*datapoint,
+					statusboard.DataPoint{
+						Title: memstat.label,
+						Value: val,
+					})
+			}
+		}
+
+		graph_entries := make([]statusboard.GraphEntry, 0)
+		for memtype, datapoint := range datapoints {
+			graph_entries = append(graph_entries,
+				statusboard.GraphEntry{
+					Title:      memtype,
+					Datapoints: *datapoint,
+				},
+			)
+		}
+		jsonobj := statusboard.GraphJSON{
+			Graph: statusboard.GraphData{
+				Title:         "SystemInfo",
+				Datasequences: graph_entries,
+			},
+		}
+
+		b, _ := json.Marshal(jsonobj)
+		fmt.Fprintf(w, "%s", b)
+	}
 }
 
 func main() {
 	http.HandleFunc("/hello", hello_handler)
-	http.HandleFunc("/proc", proc_handler)
+	http.HandleFunc("/proc", get_proc_handler())
 	http.ListenAndServe(":8080", nil)
 }
