@@ -6,6 +6,8 @@ type GraphJSON struct {
 
 type GraphData struct {
 	Title         string       `json:"title"`
+	Total         bool         `json:"total"`
+	Type          string       `json:"type"`
 	Datasequences []GraphEntry `json:"datasequences"`
 }
 

@@ -112,6 +112,8 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 			Graph: statusboard.GraphData{
 				Title:         "SystemInfo",
 				Datasequences: graph_entries,
+				Total:         false,
+				Type:          "line",
 			},
 		}
 
