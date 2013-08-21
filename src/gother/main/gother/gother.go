@@ -82,6 +82,6 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/hello", hello_handler)
-	http.HandleFunc("/proc", get_proc_handler())
+	http.HandleFunc("/proc/meminfo", get_proc_handler())
 	http.ListenAndServe(":8080", nil)
 }
