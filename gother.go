@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"gother/statusboard"
-	"gother/system"
+	"github.com/yushi/gother/statusboard"
+	"github.com/yushi/gother/system"
 	"net/http"
 	"time"
 )

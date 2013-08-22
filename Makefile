@@ -1,10 +1,10 @@
-.PHONY: deps gother all
-export GOPATH:=$(shell pwd)
+.PHONY: gother all
+GOTHER_BIN = bin/gother
 
-all: gother
+all: $(GOTHER_BIN)
 
-deps:
-	go get -d -v gother/...
+$(GOTHER_BIN):
+	go build -v -o $@
 
-gother: deps
-	go install gother/main/gother
+clean:
+	rm -rf $(GOTHER_BIN)
