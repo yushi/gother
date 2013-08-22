@@ -62,7 +62,6 @@ func GetSystemStat() *SystemStat {
 		}
 	}
 
-	fmt.Println(stat)
 	return stat
 }
 

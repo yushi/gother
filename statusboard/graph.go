@@ -18,6 +18,6 @@ type GraphEntry struct {
 }
 
 type DataPoint struct {
-	Title string `json:"title"`
-	Value int64  `json:"value"`
+	Title string  `json:"title"`
+	Value float64 `json:"value"`
 }
