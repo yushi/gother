@@ -8,10 +8,10 @@ import (
 )
 
 type MemInfo struct {
-	Free     int
-	Active   int
-	Wired    int
-	Inactive int
+	Free     int64
+	Active   int64
+	Wired    int64
+	Inactive int64
 }
 
 func GetMemInfo() *MemInfo {
@@ -27,7 +27,7 @@ func GetMemInfo() *MemInfo {
 		val := rows[1]
 		val = strings.TrimLeft(val, " ")
 		val = strings.TrimRight(val, ".")
-		int_val, _ := strconv.Atoi(val)
+		int_val, _ := strconv.ParseInt(val, 10, 64)
 		int_val = int_val * 4096        // page to Byte
 		int_val = int_val / 1024 / 1024 // to MByte
 		switch rows[0] {

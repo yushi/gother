@@ -13,10 +13,11 @@ type GraphData struct {
 
 type GraphEntry struct {
 	Title      string      `json:"title"`
+	Color      string      `json:"color",omitempty`
 	Datapoints []DataPoint `json:"datapoints"`
 }
 
 type DataPoint struct {
 	Title string `json:"title"`
-	Value int    `json:"value"`
+	Value int64  `json:"value"`
 }

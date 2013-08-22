@@ -30,20 +30,17 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 		memstats = append(memstats, m)
 
 		datapoints := map[string]*[]statusboard.DataPoint{
-			"MemWired":    new([]statusboard.DataPoint),
-			"MemActive":   new([]statusboard.DataPoint),
+			"MemUsed":     new([]statusboard.DataPoint),
 			"MemInactive": new([]statusboard.DataPoint),
 			"MemFree":     new([]statusboard.DataPoint),
 		}
 
 		for _, memstat := range memstats {
 			for memtype, datapoint := range datapoints {
-				var val int
+				var val int64
 				switch memtype {
-				case "MemWired":
-					val = memstat.meminfo.Wired
-				case "MemActive":
-					val = memstat.meminfo.Active
+				case "MemUsed":
+					val = memstat.meminfo.Wired + memstat.meminfo.Active
 				case "MemInactive":
 					val = memstat.meminfo.Inactive
 				case "MemFree":
@@ -59,9 +56,19 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 
 		graph_entries := make([]statusboard.GraphEntry, 0)
 		for memtype, datapoint := range datapoints {
+			var color string
+			switch memtype {
+			case "MemUsed":
+				color = "Red"
+			case "MemInactive":
+				color = "Blue"
+			case "MemFree":
+				color = "Green"
+			}
 			graph_entries = append(graph_entries,
 				statusboard.GraphEntry{
 					Title:      memtype,
+					Color:      color,
 					Datapoints: *datapoint,
 				},
 			)
