@@ -30,20 +30,20 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 		memstats = append(memstats, m)
 
 		datapoints := map[string]*[]statusboard.DataPoint{
-			"MemUsed":     new([]statusboard.DataPoint),
-			"MemInactive": new([]statusboard.DataPoint),
-			"MemFree":     new([]statusboard.DataPoint),
+			"Used":     new([]statusboard.DataPoint),
+			"Inactive": new([]statusboard.DataPoint),
+			"Free":     new([]statusboard.DataPoint),
 		}
 
 		for _, memstat := range memstats {
 			for memtype, datapoint := range datapoints {
 				var val int64
 				switch memtype {
-				case "MemUsed":
+				case "Used":
 					val = memstat.meminfo.Wired + memstat.meminfo.Active
-				case "MemInactive":
+				case "Inactive":
 					val = memstat.meminfo.Inactive
-				case "MemFree":
+				case "Free":
 					val = memstat.meminfo.Free
 				}
 				*datapoint = append(*datapoint,
@@ -58,11 +58,11 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 		for memtype, datapoint := range datapoints {
 			var color string
 			switch memtype {
-			case "MemUsed":
+			case "Used":
 				color = "Red"
-			case "MemInactive":
+			case "Inactive":
 				color = "Blue"
-			case "MemFree":
+			case "Free":
 				color = "Green"
 			}
 			graph_entries = append(graph_entries,
@@ -75,7 +75,7 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 		}
 		jsonobj := statusboard.GraphJSON{
 			Graph: statusboard.GraphData{
-				Title:         "SystemInfo",
+				Title:         "Memory",
 				Datasequences: graph_entries,
 				Total:         false,
 				Type:          "line",
