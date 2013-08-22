@@ -13,7 +13,7 @@ func hello_handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello Go!")
 }
 
-func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
+func get_proc_mem_handler() func(w http.ResponseWriter, r *http.Request) {
 	type MemStat struct {
 		label   string
 		meminfo *system.MemInfo
@@ -89,6 +89,6 @@ func get_proc_handler() func(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/hello", hello_handler)
-	http.HandleFunc("/proc/meminfo", get_proc_handler())
+	http.HandleFunc("/proc/meminfo", get_proc_mem_handler())
 	http.ListenAndServe(":8080", nil)
 }
