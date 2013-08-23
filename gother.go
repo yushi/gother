@@ -14,7 +14,7 @@ func hello_handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello Go!")
 }
 
-func get_proc_cpu_handler() func(w http.ResponseWriter, r *http.Request) {
+func get_proc_load_handler() func(w http.ResponseWriter, r *http.Request) {
 	type StatHistory struct {
 		label string
 		stat  system.SystemStat
@@ -24,7 +24,7 @@ func get_proc_cpu_handler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		stats[time.Now().Format("15:04:05")] = system.GetSystemStat()
 		datapoints := make(map[string][]statusboard.DataPoint)
-		for _, val := range []string{"sys", "user", "idle"} {
+		for _, val := range []string{"load1", "load5", "load15"} {
 			keys := make([]string, 0)
 			for k, _ := range stats {
 				keys = append(keys, k)
@@ -34,12 +34,12 @@ func get_proc_cpu_handler() func(w http.ResponseWriter, r *http.Request) {
 				var v float64
 				s := stats[k]
 				switch val {
-				case "sys":
-					v = s.Cpu.Sys
-				case "user":
-					v = s.Cpu.User
-				case "idle":
-					v = s.Cpu.Idle
+				case "load1":
+					v = s.Load.Load1
+				case "load5":
+					v = s.Load.Load5
+				case "load15":
+					v = s.Load.Load15
 				}
 				datapoints[val] = append(
 					datapoints[val],
@@ -71,7 +71,7 @@ func get_proc_cpu_handler() func(w http.ResponseWriter, r *http.Request) {
 		}
 		jsonobj := statusboard.GraphJSON{
 			Graph: statusboard.GraphData{
-				Title:         "CPU Usage",
+				Title:         "Loadavg",
 				Datasequences: graph_entries,
 				Total:         false,
 				Type:          "line",
@@ -162,6 +162,6 @@ func get_proc_mem_handler() func(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/hello", hello_handler)
 	http.HandleFunc("/proc/mem", get_proc_mem_handler())
-	http.HandleFunc("/proc/cpu", get_proc_cpu_handler())
+	http.HandleFunc("/proc/cpu", get_proc_load_handler())
 	http.ListenAndServe(":8080", nil)
 }
