@@ -164,4 +164,5 @@ func main() {
 	http.HandleFunc("/proc/mem", get_proc_mem_handler())
 	http.HandleFunc("/proc/cpu", get_proc_load_handler())
 	http.ListenAndServe(":8080", nil)
+	fmt.Println("HOGE")
 }
