@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/yushi/gother/system"
 	"reflect"
-	"sort"
 )
 
 type GraphJSON struct {
@@ -29,21 +28,8 @@ type DataPoint struct {
 	Value float64 `json:"value"`
 }
 
-func LoadavgGraph(stats map[string]*system.SystemStat) []byte {
+func LoadavgGraph(stats []system.SystemStatHistory) []byte {
 	datapoints := getDatapoints(stats, "Load", []string{"Load1", "Load5", "Load15"})
-
-	color_map := map[string]string{
-		"used":   "Red",
-		"cached": "Blue",
-		"free":   "Green",
-	}
-
-	graph_entries := getGraphEntries(datapoints, color_map)
-	return getGraphJSON("Loadavg", graph_entries)
-}
-
-func MemoryGraph(stats map[string]*system.SystemStat) []byte {
-	datapoints := getDatapoints(stats, "Mem", []string{"Used", "Cached", "Free"})
 	color_map := map[string]string{
 		"Load1":  "Red",
 		"Load5":  "Blue",
@@ -51,25 +37,34 @@ func MemoryGraph(stats map[string]*system.SystemStat) []byte {
 	}
 
 	graph_entries := getGraphEntries(datapoints, color_map)
+	return getGraphJSON("Loadavg", graph_entries)
+}
+
+func MemoryGraph(stats []system.SystemStatHistory) []byte {
+	datapoints := getDatapoints(stats, "Mem", []string{"Used", "Cached", "Free"})
+
+	color_map := map[string]string{
+		"Used":   "Red",
+		"Cached": "Blue",
+		"Free":   "Green",
+	}
+
+	graph_entries := getGraphEntries(datapoints, color_map)
 	return getGraphJSON("Memory", graph_entries)
 }
 
-func getDatapoints(stats map[string]*system.SystemStat, statField string, valueFields []string) map[string][]DataPoint {
+func getDatapoints(stats []system.SystemStatHistory, statField string, valueFields []string) map[string][]DataPoint {
 	datapoints := make(map[string][]DataPoint)
 	for _, val := range valueFields {
-		keys := make([]string, 0)
-		for k, _ := range stats {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
-			statValue := reflect.ValueOf(stats[k]).Elem()
+		for _, e := range stats {
+			statValue := reflect.ValueOf(e.Stat).Elem()
 			statFieldValue := statValue.FieldByName(statField)
 			v := statFieldValue.Elem().FieldByName(val).Float()
+
 			datapoints[val] = append(
 				datapoints[val],
 				DataPoint{
-					Title: k,
+					Title: e.Time,
 					Value: v,
 				})
 		}

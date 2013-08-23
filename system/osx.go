@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+type SystemStatHistory struct {
+	Time string
+	Stat *SystemStat
+}
+
 type SystemStat struct {
 	Load *LoadStat
 	Mem  *MemStat
