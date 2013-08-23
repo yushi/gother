@@ -28,7 +28,7 @@ type DataPoint struct {
 	Value float64 `json:"value"`
 }
 
-func LoadavgGraph(stats []system.SystemStatHistory) []byte {
+func LoadavgGraph(stats []system.StatHistory) []byte {
 	datapoints := getDatapoints(stats, "Load", []string{"Load1", "Load5", "Load15"})
 	color_map := map[string]string{
 		"Load1":  "Red",
@@ -40,7 +40,7 @@ func LoadavgGraph(stats []system.SystemStatHistory) []byte {
 	return getGraphJSON("Loadavg", graph_entries)
 }
 
-func MemoryGraph(stats []system.SystemStatHistory) []byte {
+func MemoryGraph(stats []system.StatHistory) []byte {
 	datapoints := getDatapoints(stats, "Mem", []string{"Used", "Cached", "Free"})
 
 	color_map := map[string]string{
@@ -53,7 +53,7 @@ func MemoryGraph(stats []system.SystemStatHistory) []byte {
 	return getGraphJSON("Memory", graph_entries)
 }
 
-func getDatapoints(stats []system.SystemStatHistory, statField string, valueFields []string) map[string][]DataPoint {
+func getDatapoints(stats []system.StatHistory, statField string, valueFields []string) map[string][]DataPoint {
 	datapoints := make(map[string][]DataPoint)
 	for _, val := range valueFields {
 		for _, e := range stats {

@@ -21,13 +21,13 @@ func getTimeStr() string {
 	return time.Now().Format("15:04")
 }
 
-func updateStats(stats []system.SystemStatHistory) []system.SystemStatHistory {
+func updateStats(stats []system.StatHistory) []system.StatHistory {
 	now := getTimeStr()
 	if len(stats) == 0 || now != stats[len(stats)-1].Time {
 		stats = append(stats,
-			system.SystemStatHistory{
+			system.StatHistory{
 				Time: getTimeStr(),
-				Stat: system.GetSystemStat(),
+				Stat: system.GetStat(),
 			})
 	}
 	if len(stats) > 1440 {
@@ -37,7 +37,7 @@ func updateStats(stats []system.SystemStatHistory) []system.SystemStatHistory {
 }
 
 func getProcLoadHandler() func(w http.ResponseWriter, r *http.Request) {
-	stats := make([]system.SystemStatHistory, 0)
+	stats := make([]system.StatHistory, 0)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		stats = updateStats(stats)
@@ -46,7 +46,7 @@ func getProcLoadHandler() func(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProcMemHandler() func(w http.ResponseWriter, r *http.Request) {
-	stats := make([]system.SystemStatHistory, 0)
+	stats := make([]system.StatHistory, 0)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		stats = updateStats(stats)

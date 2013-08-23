@@ -9,12 +9,12 @@ import (
 	"strings"
 )
 
-type SystemStatHistory struct {
+type StatHistory struct {
 	Time string
-	Stat *SystemStat
+	Stat *Stat
 }
 
-type SystemStat struct {
+type Stat struct {
 	Load *LoadStat
 	Mem  *MemStat
 }
@@ -31,8 +31,8 @@ type MemStat struct {
 	Free   float64
 }
 
-func GetSystemStat() *SystemStat {
-	stat := new(SystemStat)
+func GetStat() *Stat {
+	stat := new(Stat)
 	top_output := top()
 	for _, line := range strings.Split(top_output, "\n") {
 		if strings.HasPrefix(line, "Load Avg:") {
