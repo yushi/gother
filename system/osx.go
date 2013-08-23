@@ -21,9 +21,9 @@ type LoadStat struct {
 }
 
 type MemStat struct {
-	Used   int64
-	Cached int64
-	Free   int64
+	Used   float64
+	Cached float64
+	Free   float64
 }
 
 func GetSystemStat() *SystemStat {
@@ -49,10 +49,10 @@ func GetSystemStat() *SystemStat {
 			re := regexp.MustCompile("[0-9]+")
 			mems := re.FindAllString(line, -1)
 
-			wired, _ := strconv.ParseInt(mems[0], 10, 64)
-			active, _ := strconv.ParseInt(mems[1], 10, 64)
-			inactive, _ := strconv.ParseInt(mems[2], 10, 64)
-			free, _ := strconv.ParseInt(mems[4], 10, 64)
+			wired, _ := strconv.ParseFloat(mems[0], 64)
+			active, _ := strconv.ParseFloat(mems[1], 64)
+			inactive, _ := strconv.ParseFloat(mems[2], 64)
+			free, _ := strconv.ParseFloat(mems[4], 64)
 
 			stat.Mem = &MemStat{
 				Used:   wired + active,

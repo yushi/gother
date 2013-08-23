@@ -3,7 +3,7 @@ GOTHER_BIN = bin/gother
 
 all: $(GOTHER_BIN)
 
-$(GOTHER_BIN): $(GOPATH)/src/github.com/yushi/gother
+$(GOTHER_BIN): . ./system/* ./statusboard/*
 	go build -v -o $@
 
 test:

@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/yushi/gother/statusboard"
 	"github.com/yushi/gother/system"
 	"log"
 	"net/http"
-	"sort"
 	"time"
 )
 
@@ -16,148 +14,28 @@ func hello_handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello Go!")
 }
 
+func getTimeStr() string {
+	// for test
+	//return time.Now().Format("15:04:05")
+
+	return time.Now().Format("15:04")
+}
+
 func get_proc_load_handler() func(w http.ResponseWriter, r *http.Request) {
-	type StatHistory struct {
-		label string
-		stat  system.SystemStat
-	}
 	stats := make(map[string]*system.SystemStat)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		stats[time.Now().Format("15:04:05")] = system.GetSystemStat()
-		datapoints := make(map[string][]statusboard.DataPoint)
-		for _, val := range []string{"load1", "load5", "load15"} {
-			keys := make([]string, 0)
-			for k, _ := range stats {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-			for _, k := range keys {
-				var v float64
-				s := stats[k]
-				switch val {
-				case "load1":
-					v = s.Load.Load1
-				case "load5":
-					v = s.Load.Load5
-				case "load15":
-					v = s.Load.Load15
-				}
-				datapoints[val] = append(
-					datapoints[val],
-					statusboard.DataPoint{
-						Title: k,
-						Value: v,
-					})
-			}
-		}
-
-		graph_entries := make([]statusboard.GraphEntry, 0)
-		for cpu_type, datapoint := range datapoints {
-			var color string
-			switch cpu_type {
-			case "Used":
-				color = "Red"
-			case "Inactive":
-				color = "Blue"
-			case "Free":
-				color = "Green"
-			}
-			graph_entries = append(graph_entries,
-				statusboard.GraphEntry{
-					Title:      cpu_type,
-					Color:      color,
-					Datapoints: datapoint,
-				},
-			)
-		}
-		jsonobj := statusboard.GraphJSON{
-			Graph: statusboard.GraphData{
-				Title:         "Loadavg",
-				Datasequences: graph_entries,
-				Total:         false,
-				Type:          "line",
-			},
-		}
-
-		b, _ := json.Marshal(jsonobj)
-		fmt.Fprintf(w, "%s", b)
-
+		stats[getTimeStr()] = system.GetSystemStat()
+		fmt.Fprintf(w, "%s", statusboard.LoadavgGraph(stats))
 	}
 }
 
 func get_proc_mem_handler() func(w http.ResponseWriter, r *http.Request) {
-	type MemStat struct {
-		label   string
-		meminfo *system.MemInfo
-	}
-	memstats := make([]MemStat, 0)
+	stats := make(map[string]*system.SystemStat)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		m := MemStat{
-			label:   time.Now().Format("15:04:05"),
-			meminfo: system.GetMemInfo(),
-		}
-
-		memstats = append(memstats, m)
-
-		datapoints := map[string]*[]statusboard.DataPoint{
-			"Used":     new([]statusboard.DataPoint),
-			"Inactive": new([]statusboard.DataPoint),
-			"Free":     new([]statusboard.DataPoint),
-		}
-
-		for _, memstat := range memstats {
-			for memtype, datapoint := range datapoints {
-				var val float64
-				switch memtype {
-				case "Used":
-					val = float64(memstat.meminfo.Wired) +
-						float64(memstat.meminfo.Active)
-				case "Inactive":
-					val = float64(memstat.meminfo.Inactive)
-				case "Free":
-					val = float64(memstat.meminfo.Free)
-				}
-				*datapoint = append(*datapoint,
-					statusboard.DataPoint{
-						Title: memstat.label,
-						Value: val,
-					})
-			}
-		}
-
-		graph_entries := make([]statusboard.GraphEntry, 0)
-		for memtype, datapoint := range datapoints {
-			var color string
-			switch memtype {
-			case "Used":
-				color = "Red"
-			case "Inactive":
-				color = "Blue"
-			case "Free":
-				color = "Green"
-			}
-			graph_entries = append(graph_entries,
-				statusboard.GraphEntry{
-					Title:      memtype,
-					Color:      color,
-					Datapoints: *datapoint,
-				},
-			)
-		}
-		jsonobj := statusboard.GraphJSON{
-			Graph: statusboard.GraphData{
-				Title:         "Memory",
-				Datasequences: graph_entries,
-				Total:         false,
-				Type:          "line",
-			},
-		}
-
-		b, _ := json.Marshal(jsonobj)
-		fmt.Fprintf(w, "%s", b)
+		stats[getTimeStr()] = system.GetSystemStat()
+		fmt.Fprintf(w, "%s", statusboard.MemoryGraph(stats))
 	}
 }
 
@@ -167,7 +45,7 @@ func main() {
 
 	http.HandleFunc("/hello", hello_handler)
 	http.HandleFunc("/proc/mem", get_proc_mem_handler())
-	http.HandleFunc("/proc/cpu", get_proc_load_handler())
+	http.HandleFunc("/proc/load", get_proc_load_handler())
 
 	log.Printf("About to listen on %d", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
