@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/yushi/gother/statusboard"
 	"github.com/yushi/gother/system"
+	"log"
 	"net/http"
 	"sort"
 	"time"
@@ -160,9 +162,16 @@ func get_proc_mem_handler() func(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := flag.Int("p", 9090, "listen port")
+	flag.Parse()
+
 	http.HandleFunc("/hello", hello_handler)
 	http.HandleFunc("/proc/mem", get_proc_mem_handler())
 	http.HandleFunc("/proc/cpu", get_proc_load_handler())
-	http.ListenAndServe(":8080", nil)
-	fmt.Println("HOGE")
+
+	log.Printf("About to listen on %d", *port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
