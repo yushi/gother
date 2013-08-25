@@ -29,6 +29,7 @@ type MemStat struct {
 	Used   float64
 	Cached float64
 	Free   float64
+	Swap   float64
 }
 
 func GetStat() *Stat {
@@ -63,11 +64,28 @@ func GetStat() *Stat {
 				Used:   wired + active,
 				Cached: inactive,
 				Free:   free,
+				Swap:   getSwapUsage(),
 			}
 		}
 	}
 
 	return stat
+}
+
+func getSwapUsage() float64 {
+	re := regexp.MustCompile("[0-9]+.[0-9]")
+	swapinfo := re.FindAllString(vm_swapusage(), -1)
+	used, _ := strconv.ParseFloat(swapinfo[1], 64)
+	return used
+}
+
+func vm_swapusage() string {
+	out, err := execute("sysctl", "vm.swapusage")
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return out
 }
 
 func top() string {
