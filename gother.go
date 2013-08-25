@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const VERSION = "0.0.1-dev"
+const VERSION = "0.1.0"
 
 func hello_handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello Go!")
