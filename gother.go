@@ -6,18 +6,10 @@ import (
 	"github.com/yushi/gother/handler"
 	"log"
 	"net/http"
-	"time"
 )
 
 func hello_handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello Go!")
-}
-
-func getTimeStr() string {
-	// for test
-	//return time.Now().Format("15:04:05")
-
-	return time.Now().Format("15:04")
 }
 
 func main() {

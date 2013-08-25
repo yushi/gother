@@ -4,9 +4,6 @@ import (
 	"testing"
 )
 
-func TestHoge(t *testing.T) {
-	stat := GetSystemStat()
-	if stat != nil {
-		return
-	}
+func TestGetStat(t *testing.T) {
+	GetStat()
 }

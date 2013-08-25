@@ -12,6 +12,9 @@ test:
 test-cov:
 	 gocov test github.com/yushi/gother/... | gocov report
 
+test-cov-html:
+	 gocov test github.com/yushi/gother/... | gocov-html > coverage.html
+
 run: $(GOTHER_BIN)
 	./bin/gother
 
