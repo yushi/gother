@@ -6,6 +6,19 @@ import (
 	"reflect"
 )
 
+const (
+	Yellow     = "Yellow"
+	Green      = "Green"
+	Red        = "Red"
+	Purple     = "Purple"
+	Blue       = "Blue"
+	MediumGray = "MediumGray"
+	Pink       = "Pink"
+	Aqua       = "Aqua"
+	Orange     = "Orange"
+	LightGray  = "LightGray"
+)
+
 type GraphJSON struct {
 	Graph GraphData `json:"graph"`
 }
@@ -31,9 +44,9 @@ type DataPoint struct {
 func LoadavgGraph(stats []system.StatHistory) []byte {
 	datapoints := getDatapoints(stats, "Load", []string{"Load1", "Load5", "Load15"})
 	color_map := map[string]string{
-		"Load1":  "Red",
-		"Load5":  "Blue",
-		"Load15": "Green",
+		"Load1":  Red,
+		"Load5":  Blue,
+		"Load15": Green,
 	}
 
 	graph_entries := getGraphEntries(datapoints, color_map)
@@ -48,10 +61,10 @@ func MemoryGraph(stats []system.StatHistory) []byte {
 		"Swap"})
 
 	color_map := map[string]string{
-		"Used":   "Red",
-		"Cached": "Blue",
-		"Free":   "Green",
-		"Swap":   "LightGray",
+		"Used":   Red,
+		"Cached": Blue,
+		"Free":   Green,
+		"Swap":   LightGray,
 	}
 
 	graph_entries := getGraphEntries(datapoints, color_map)
