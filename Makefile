@@ -1,9 +1,12 @@
-.PHONY: gother all
+.PHONY: gother allTest test-cov test-cov-html run clean
 GOTHER_BIN = bin/gother
 
 all: $(GOTHER_BIN)
 
-$(GOTHER_BIN): . ./system/* ./statusboard/* ./handler/* ./github/*
+deps:
+	go get github.com/google/go-github/github
+
+$(GOTHER_BIN): deps . ./system/* ./statusboard/* ./handler/* ./github/*
 	go build -v -o $@
 
 test:
