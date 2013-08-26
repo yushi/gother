@@ -25,9 +25,12 @@ func main() {
 	}
 	procHandler := new(handler.ProcHandler)
 	procHandler.Start()
+	githubHandler := new(handler.GithubHandler)
+
 	http.HandleFunc("/hello", hello_handler)
 	http.HandleFunc("/proc/mem", procHandler.HandleMemory)
 	http.HandleFunc("/proc/load", procHandler.HandleLoadavg)
+	http.HandleFunc("/gh/notification", githubHandler.HandleNotification)
 
 	log.Printf("About to listen on %d", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)

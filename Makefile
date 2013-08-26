@@ -3,7 +3,7 @@ GOTHER_BIN = bin/gother
 
 all: $(GOTHER_BIN)
 
-$(GOTHER_BIN): . ./system/* ./statusboard/* ./handler/*
+$(GOTHER_BIN): . ./system/* ./statusboard/* ./handler/* ./github/*
 	go build -v -o $@
 
 test:
