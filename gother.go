@@ -28,15 +28,7 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 `)
 }
 
-func main() {
-	port := flag.Int("p", 9090, "listen port")
-	printVersion := flag.Bool("v", false, "print version")
-	flag.Parse()
-
-	if *printVersion {
-		fmt.Println(VERSION)
-		return
-	}
+func startService(port int) {
 	procHandler := new(handler.ProcHandler)
 	procHandler.Start()
 	githubHandler := new(handler.GithubHandler)
@@ -46,9 +38,22 @@ func main() {
 	http.HandleFunc("/proc/load", procHandler.HandleLoadavg)
 	http.HandleFunc("/gh/notification", githubHandler.HandleNotification)
 
-	log.Printf("About to listen on %d", *port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+	log.Printf("About to listen on %d", port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func main() {
+	port := flag.Int("p", 9090, "listen port")
+	printVersion := flag.Bool("v", false, "print version")
+	flag.Parse()
+
+	if *printVersion {
+		fmt.Println(VERSION)
+		return
+	}
+
+	startService(*port)
 }
