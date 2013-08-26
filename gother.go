@@ -10,8 +10,22 @@ import (
 
 const VERSION = "0.1.0"
 
-func hello_handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello Go!")
+func listHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, `
+<html>
+  <body>
+    <div>
+      <a href="/proc/mem">/proc/mem</a>
+    </div>
+    <div>
+    <a href="/proc/load">/proc/load</a>
+    </div>
+    <div>
+    <a href="/gh/notification">/gh/notification</a>?user=XXX&apiurl=YYY
+    </div>
+  </body>
+</html>
+`)
 }
 
 func main() {
@@ -27,7 +41,7 @@ func main() {
 	procHandler.Start()
 	githubHandler := new(handler.GithubHandler)
 
-	http.HandleFunc("/hello", hello_handler)
+	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/proc/mem", procHandler.HandleMemory)
 	http.HandleFunc("/proc/load", procHandler.HandleLoadavg)
 	http.HandleFunc("/gh/notification", githubHandler.HandleNotification)
