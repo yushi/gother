@@ -27,6 +27,14 @@ func getTimeStr() string {
 	return time.Now().Format("15:04")
 }
 
+func (p *ProcHandler) dropOldData() {
+	entries := 60 * 24 // min * hour
+	if len(p.Stats) > entries {
+		drops := len(p.Stats) - entries
+		p.Stats = p.Stats[drops:]
+	}
+}
+
 func (p *ProcHandler) Update() {
 	now := getTimeStr()
 	if len(p.Stats) == 0 || now != p.Stats[len(p.Stats)-1].Time {
@@ -36,9 +44,7 @@ func (p *ProcHandler) Update() {
 				Stat: system.GetStat(),
 			})
 	}
-	if len(p.Stats) > 1440 {
-		p.Stats = p.Stats[0:1440]
-	}
+	p.dropOldData()
 }
 
 func (p *ProcHandler) UpdatePeriodically() {
