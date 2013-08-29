@@ -32,11 +32,13 @@ func startService(port int) {
 	procHandler := new(handler.ProcHandler)
 	procHandler.Start()
 	githubHandler := new(handler.GithubHandler)
+	ekikaraHandler := new(handler.EkikaraHandler)
 
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/proc/mem", procHandler.HandleMemory)
 	http.HandleFunc("/proc/load", procHandler.HandleLoadavg)
 	http.HandleFunc("/gh/notification", githubHandler.HandleNotification)
+	http.HandleFunc("/ekikara", ekikaraHandler.HandleEkikara)
 
 	log.Printf("About to listen on %d", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
