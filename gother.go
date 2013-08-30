@@ -33,6 +33,7 @@ func startService(port int) {
 	procHandler.Start()
 	githubHandler := new(handler.GithubHandler)
 	ekikaraHandler := new(handler.EkikaraHandler)
+	ekikaraHandler.Init()
 
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/proc/mem", procHandler.HandleMemory)

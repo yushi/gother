@@ -59,14 +59,24 @@ func trainTable(schedules []ekikara.Schedule) string {
 }
 
 type EkikaraHandler struct {
-	Schedules *[]ekikara.Schedule
+	Schedules map[string][]ekikara.Schedule
+}
+
+func (p *EkikaraHandler) Init() {
+	p.Schedules = make(map[string][]ekikara.Schedule)
 }
 
 func (p *EkikaraHandler) HandleEkikara(w http.ResponseWriter, r *http.Request) {
-	if p.Schedules == nil {
-		e := ekikara.NewEkikara("1310071", "down1_13101231")
+	q := r.URL.Query()
+	dir := q["dir"][0]
+	file := q["file"][0]
+	key := dir + file
+
+	if _, ok := p.Schedules[key]; !ok {
+		e := ekikara.NewEkikara(dir, file)
 		schedules := e.GetSchedules()
-		p.Schedules = &schedules
+		p.Schedules[key] = schedules
 	}
-	fmt.Fprintf(w, "%s", trainTable(*p.Schedules))
+
+	fmt.Fprintf(w, "%s", trainTable(p.Schedules[key]))
 }
