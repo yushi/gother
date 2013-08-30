@@ -4,7 +4,7 @@ GOTHER_BIN = bin/gother
 all: $(GOTHER_BIN)
 
 deps:
-	go get -d
+	go get -d -v
 
 $(GOTHER_BIN): deps . ./system/* ./statusboard/* ./handler/* ./github/*
 	go build -v -o $@
