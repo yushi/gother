@@ -6,7 +6,13 @@ import (
 	"github.com/yushi/gother/ekikara"
 	"html/template"
 	"net/http"
+	"time"
 )
+
+type ReadableSchedule struct {
+	Time string
+	To   string
+}
 
 func trainTable(schedules []ekikara.Schedule) string {
 	var html bytes.Buffer
@@ -18,14 +24,33 @@ func trainTable(schedules []ekikara.Schedule) string {
   </tr>
   {{range $i, $v:= .}}
   <tr>
-    <td>{{.Hour}}{{.Min}}</td>
+    <td>{{.Time}}</td>
     <td>{{.To}}</td>
   </tr>
   {{end}}
 </table>
 `)
 
-	err = t.Execute(&html, schedules)
+	now := time.Now()
+
+	vars := []ReadableSchedule{}
+	for _, s := range schedules {
+		if s.Hour < int64(now.Hour()) {
+			continue
+		}
+		if s.Hour == int64(now.Hour()) && s.Min < int64(now.Minute()) {
+			continue
+		}
+
+		vars = append(vars, ReadableSchedule{
+			Time: fmt.Sprintf("%02d:%02d", s.Hour, s.Min),
+			To:   s.To,
+		})
+		if len(vars) > 9 {
+			break
+		}
+	}
+	err = t.Execute(&html, vars)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -43,6 +68,5 @@ func (p *EkikaraHandler) HandleEkikara(w http.ResponseWriter, r *http.Request) {
 		schedules := e.GetSchedules()
 		p.Schedules = &schedules
 	}
-	fmt.Println(p.Schedules)
 	fmt.Fprintf(w, "%s", trainTable(*p.Schedules))
 }
