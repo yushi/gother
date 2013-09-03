@@ -11,7 +11,7 @@ import (
 func notificationTable(notifications []github.Notification) string {
 	var html bytes.Buffer
 	t, err := template.New("gh_notification").Parse(`
-<table id="projects">
+<table id="projects" style="font-size: x-small">
   <tr>
     <th>Repo</th>
     <th>User</th>
