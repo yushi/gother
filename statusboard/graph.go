@@ -56,15 +56,13 @@ func LoadavgGraph(stats []system.StatHistory) []byte {
 func MemoryGraph(stats []system.StatHistory) []byte {
 	datapoints := getDatapoints(stats, "Mem", []string{
 		"Used",
-		"Cached",
 		"Free",
 		"Swap"})
 
 	color_map := map[string]string{
-		"Used":   Red,
-		"Cached": Blue,
-		"Free":   Green,
-		"Swap":   LightGray,
+		"Used": Red,
+		"Free": Green,
+		"Swap": LightGray,
 	}
 
 	graph_entries := getGraphEntries(datapoints, color_map)

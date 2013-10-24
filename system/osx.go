@@ -26,10 +26,9 @@ type LoadStat struct {
 }
 
 type MemStat struct {
-	Used   float64
-	Cached float64
-	Free   float64
-	Swap   float64
+	Used float64
+	Free float64
+	Swap float64
 }
 
 func GetStat() *Stat {
@@ -51,20 +50,17 @@ func GetStat() *Stat {
 				Load15: load15,
 			}
 		} else if strings.HasPrefix(line, "PhysMem") {
-			// ex) PhysMem: 1293M wired, 3782M active, 1281M inactive, 6357M used, 1834M free.
+			// ex ) PhysMem: 6484M used (1288M wired), 1347M unused.
 			re := regexp.MustCompile("[0-9]+")
 			mems := re.FindAllString(line, -1)
 
-			wired, _ := strconv.ParseFloat(mems[0], 64)
-			active, _ := strconv.ParseFloat(mems[1], 64)
-			inactive, _ := strconv.ParseFloat(mems[2], 64)
-			free, _ := strconv.ParseFloat(mems[4], 64)
+			used, _ := strconv.ParseFloat(mems[0], 64)
+			free, _ := strconv.ParseFloat(mems[2], 64)
 
 			stat.Mem = &MemStat{
-				Used:   wired + active,
-				Cached: inactive,
-				Free:   free,
-				Swap:   getSwapUsage(),
+				Used: used,
+				Free: free,
+				Swap: getSwapUsage(),
 			}
 		}
 	}
