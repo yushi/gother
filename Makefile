@@ -10,13 +10,14 @@ $(GOTHER_BIN): deps . ./system/* ./statusboard/* ./handler/* ./github/*
 	go build -v -o $@
 
 test:
+	go test -i ./...
 	go test -v ./...
 
 test-cov:
-	 gocov test github.com/yushi/gother/... | gocov report
+	 gocov test ./... | gocov report
 
 test-cov-html:
-	 gocov test github.com/yushi/gother/... | gocov-html > coverage.html
+	 gocov test ./... | gocov-html > coverage.html
 
 run: $(GOTHER_BIN)
 	./bin/gother
